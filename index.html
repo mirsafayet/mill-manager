@@ -7,74 +7,783 @@
   <meta name="description" content="মিল ম্যানেজার - রাইস মিল ও মেম্বার হিসাব ব্যবস্থাপনা" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <title>মিল ম্যানেজার</title>
+
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>"
+  />
+
+  <link
+    rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>"
+  />
+
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
-  <!-- Login Screen -->
+
+  <!-- =========================================================
+       LOGIN SCREEN
+  ========================================================== -->
   <div id="login-screen" class="screen">
+
     <div class="login-card">
+
       <div class="login-logo">🌾</div>
+
       <h1>মিল ম্যানেজার</h1>
-      <p class="login-sub">রাইস মিল ও মেম্বার হিসাব</p>
+
+      <p class="login-sub">
+        রাইস মিল ও মেম্বার হিসাব
+      </p>
+
       <form id="login-form">
+
         <div class="form-group">
           <label for="login-email">ইমেইল</label>
-          <input type="email" id="login-email" placeholder="admin@example.com" required autocomplete="email" />
+
+          <input
+            type="email"
+            id="login-email"
+            placeholder="admin@example.com"
+            required
+            autocomplete="email"
+          />
         </div>
+
         <div class="form-group">
           <label for="login-password">পাসওয়ার্ড</label>
-          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+
+          <input
+            type="password"
+            id="login-password"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+          />
         </div>
-        <button type="submit" class="btn btn-primary btn-block" id="login-btn">লগইন</button>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-block"
+          id="login-btn"
+        >
+          লগইন
+        </button>
+
         <p id="login-error" class="error-msg hidden"></p>
+
       </form>
-      <p class="setup-hint">প্রথমবার? Supabase-এ অ্যাডমিন ইউজার তৈরি করুন</p>
+
+      <p class="setup-hint">
+        প্রথমবার? Supabase-এ অ্যাডমিন ইউজার তৈরি করুন
+      </p>
+
     </div>
   </div>
 
-  <!-- App Screen -->
+
+  <!-- =========================================================
+       APP SCREEN
+  ========================================================== -->
   <div id="app-screen" class="screen hidden">
-    <!-- Top Nav -->
+
+    <!-- TOP BAR -->
     <header class="topbar">
-      <button class="menu-btn" id="menu-btn" aria-label="মেনু">☰</button>
-      <h1 class="topbar-title" id="page-title">ড্যাশবোর্ড</h1>
-      <button class="logout-btn" id="logout-btn" title="লগআউট">🚪</button>
+
+      <button
+        class="menu-btn"
+        id="menu-btn"
+        aria-label="মেনু"
+        type="button"
+      >
+        ☰
+      </button>
+
+      <h1
+        class="topbar-title"
+        id="page-title"
+      >
+        ড্যাশবোর্ড
+      </h1>
+
+      <button
+        class="logout-btn"
+        id="logout-btn"
+        title="লগআউট"
+        type="button"
+      >
+        🚪
+      </button>
+
     </header>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <span class="sidebar-logo">🌾</span>
-        <span>মিল ম্যানেজার</span>
-      </div>
-      <nav class="sidebar-nav">
-        <button class="nav-item active" data-page="dashboard">📊 ড্যাশবোর্ড</button>
-        <button class="nav-item" data-page="members">👥 মেম্বার</button>
-        <button class="nav-item" data-page="transactions">💰 লেনদেন</button>
-        <button class="nav-item" data-page="expenses">🧾 খরচ</button>
-        <button class="nav-item" data-page="monthly">📅 মাসিক হিসাব</button>
-        <button class="nav-item" data-page="reports">📈 রিপোর্ট</button>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="nav-item" id="sidebar-logout">লগআউট</button>
-      </div>
-    </aside>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <!-- Main Content -->
-    <main class="main-content" id="main-content">
-      <!-- Dashboard -->
-      <section id="page-dashboard" class="page">
+    <!-- =======================================================
+         SIDEBAR
+    ======================================================== -->
+    <aside
+      class="sidebar"
+      id="sidebar"
+    >
+
+      <div class="sidebar-header">
+
+        <span class="sidebar-logo">🌾</span>
+
+        <span>
+          মিল ম্যানেজার
+        </span>
+
+      </div>
+
+
+      <nav class="sidebar-nav">
+
+        <button
+          class="nav-item active"
+          data-page="dashboard"
+          type="button"
+        >
+          📊 ড্যাশবোর্ড
+        </button>
+
+        <button
+          class="nav-item"
+          data-page="members"
+          type="button"
+        >
+          👥 মেম্বার
+        </button>
+
+        <button
+          class="nav-item"
+          data-page="transactions"
+          type="button"
+        >
+          💰 লেনদেন
+        </button>
+
+        <button
+          class="nav-item"
+          data-page="expenses"
+          type="button"
+        >
+          🧾 খরচ
+        </button>
+
+        <button
+          class="nav-item"
+          data-page="monthly"
+          type="button"
+        >
+          📅 মাসিক হিসাব
+        </button>
+
+        <button
+          class="nav-item"
+          data-page="reports"
+          type="button"
+        >
+          📈 রিপোর্ট
+        </button>
+
+      </nav>
+
+
+      <div class="sidebar-footer">
+
+        <button
+          class="nav-item"
+          id="sidebar-logout"
+          type="button"
+        >
+          🚪 লগআউট
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <div
+      class="sidebar-overlay"
+      id="sidebar-overlay"
+    ></div>
+
+
+    <!-- =======================================================
+         MAIN CONTENT
+    ======================================================== -->
+    <main
+      class="main-content"
+      id="main-content"
+    >
+
+
+      <!-- =====================================================
+           DASHBOARD
+      ====================================================== -->
+      <section
+        id="page-dashboard"
+        class="page"
+      >
+
         <div class="stats-grid">
+
           <div class="stat-card">
-            <div class="stat-icon">👥</div>
+
+            <div class="stat-icon">
+              👥
+            </div>
+
             <div class="stat-info">
-              <span class="stat-label">মোট মেম্বার</span>
-              <span class="stat-value" id="stat-members">0</span>
-  
-...
+
+              <span class="stat-label">
+                মোট মেম্বার
+              </span>
+
+              <span
+                class="stat-value"
+                id="stat-members"
+              >
+                0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              💰
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মোট জমা
+              </span>
+
+              <span
+                class="stat-value"
+                id="stat-deposit"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              💸
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মোট উত্তোলন
+              </span>
+
+              <span
+                class="stat-value"
+                id="stat-withdrawal"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              🧾
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মোট খরচ
+              </span>
+
+              <span
+                class="stat-value"
+                id="stat-expenses"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="dashboard-grid">
+
+          <div class="card">
+
+            <div class="card-header">
+
+              <h2>
+                সাম্প্রতিক লেনদেন
+              </h2>
+
+              <button
+                class="btn btn-secondary btn-sm"
+                data-page="transactions"
+                type="button"
+              >
+                সব দেখুন
+              </button>
+
+            </div>
+
+            <div
+              id="recent-transactions"
+              class="table-wrap"
+            >
+              <p class="empty-state">
+                কোনো লেনদেন নেই
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="card">
+
+            <div class="card-header">
+
+              <h2>
+                মেম্বার ব্যালেন্স
+              </h2>
+
+              <button
+                class="btn btn-secondary btn-sm"
+                data-page="members"
+                type="button"
+              >
+                সব দেখুন
+              </button>
+
+            </div>
+
+            <div
+              id="member-balances"
+              class="table-wrap"
+            >
+              <p class="empty-state">
+                কোনো মেম্বার নেই
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           MEMBERS
+      ====================================================== -->
+      <section
+        id="page-members"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <div>
+            <h2>মেম্বার</h2>
+
+            <p>
+              মিলের সকল মেম্বারের তথ্য
+            </p>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            id="add-member-btn"
+            type="button"
+          >
+            ＋ মেম্বার যোগ করুন
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            id="members-list"
+            class="table-wrap"
+          >
+            <p class="empty-state">
+              কোনো মেম্বার নেই
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           TRANSACTIONS
+      ====================================================== -->
+      <section
+        id="page-transactions"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <div>
+            <h2>লেনদেন</h2>
+
+            <p>
+              জমা, উত্তোলন, মিল ও চালের হিসাব
+            </p>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            id="add-transaction-btn"
+            type="button"
+          >
+            ＋ লেনদেন যোগ করুন
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            id="transactions-list"
+            class="table-wrap"
+          >
+            <p class="empty-state">
+              কোনো লেনদেন নেই
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           EXPENSES
+      ====================================================== -->
+      <section
+        id="page-expenses"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <div>
+            <h2>খরচ</h2>
+
+            <p>
+              মিলের সকল খরচের হিসাব
+            </p>
+          </div>
+
+          <button
+            class="btn btn-primary"
+            id="add-expense-btn"
+            type="button"
+          >
+            ＋ খরচ যোগ করুন
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            id="expenses-list"
+            class="table-wrap"
+          >
+            <p class="empty-state">
+              কোনো খরচ নেই
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           MONTHLY
+      ====================================================== -->
+      <section
+        id="page-monthly"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <div>
+
+            <h2>
+              মাসিক হিসাব
+            </h2>
+
+            <p>
+              মাস অনুযায়ী মিলের হিসাব
+            </p>
+
+          </div>
+
+          <input
+            type="month"
+            id="monthly-filter"
+          />
+
+        </div>
+
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              💰
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মাসিক জমা
+              </span>
+
+              <span
+                class="stat-value"
+                id="monthly-deposit"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              💸
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মাসিক উত্তোলন
+              </span>
+
+              <span
+                class="stat-value"
+                id="monthly-withdrawal"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon">
+              🧾
+            </div>
+
+            <div class="stat-info">
+
+              <span class="stat-label">
+                মাসিক খরচ
+              </span>
+
+              <span
+                class="stat-value"
+                id="monthly-expenses"
+              >
+                ৳0
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            id="monthly-list"
+            class="table-wrap"
+          >
+            <p class="empty-state">
+              কোনো মাসিক হিসাব নেই
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================================
+           REPORTS
+      ====================================================== -->
+      <section
+        id="page-reports"
+        class="page hidden"
+      >
+
+        <div class="page-header">
+
+          <div>
+
+            <h2>
+              রিপোর্ট
+            </h2>
+
+            <p>
+              মিলের হিসাবের রিপোর্ট
+            </p>
+
+          </div>
+
+          <button
+            class="btn btn-primary"
+            id="generate-report-btn"
+            type="button"
+          >
+            রিপোর্ট তৈরি করুন
+          </button>
+
+        </div>
+
+
+        <div class="card">
+
+          <div
+            id="reports-content"
+            class="report-content"
+          >
+
+            <p class="empty-state">
+              রিপোর্ট তৈরি করতে উপরের বাটনে ক্লিক করুন।
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =========================================================
+       MODAL
+  ========================================================== -->
+  <div
+    id="modal"
+    class="modal hidden"
+    aria-hidden="true"
+  >
+
+    <div
+      id="modal-backdrop"
+      class="modal-backdrop"
+    ></div>
+
+    <div
+      class="modal-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+
+      <div class="modal-header">
+
+        <h2 id="modal-title">
+          তথ্য
+        </h2>
+
+        <button
+          type="button"
+          id="modal-close"
+          class="modal-close"
+          aria-label="বন্ধ করুন"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div
+        id="modal-body"
+        class="modal-body"
+      ></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       TOAST
+  ========================================================== -->
+  <div
+    id="toast"
+    class="toast hidden"
+    role="status"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- =========================================================
+       SCRIPTS
+  ========================================================== -->
+
+  <!-- Supabase configuration -->
+  <script src="config.js"></script>
+
+  <!-- Main application -->
+  <script src="app.js"></script>
+
+</body>
+</html>
