@@ -177,7 +177,7 @@ async function fetchMembers() {
 }
 
 async function fetchTransactions(limit = null) {
-  let query = supabase.from('transactions').select('*, members(name)').order('date', { ascending: false }).order('created_at', { ascending: false });
+  let query = supabase.from('transactions').select('*, members(name)').order('transaction_date', { ascending: false }).order('created_at', { ascending: false });
   if (limit) query = query.limit(limit);
   const { data, error } = await query;
   if (error) throw error;
@@ -185,7 +185,7 @@ async function fetchTransactions(limit = null) {
 }
 
 async function fetchExpenses(limit = null) {
-  let query = supabase.from('expenses').select('*').order('date', { ascending: false }).order('created_at', { ascending: false });
+  let query = supabase.from('expenses').select('*').order('expense_date', { ascending: false }).order('created_at', { ascending: false });
   if (limit) query = query.limit(limit);
   const { data, error } = await query;
   if (error) throw error;
@@ -199,7 +199,7 @@ function calculateBalances(members, transactions) {
     if (!result[t.member_id] && result[t.member_id] !== 0) result[t.member_id] = 0;
     const amount = Number(t.amount) || 0;
     if (t.type === 'deposit') result[t.member_id] += amount;
-    else if (t.type === 'withdrawal') result[t.member_id] -= amount;
+    else if (t.type === 'withdrawal' || t.type === 'meal' || t.type === 'rice') result[t.member_id] -= amount;
   });
   return result;
 }
@@ -228,7 +228,7 @@ function renderRecentTransactions(rows, targetId) {
     target.innerHTML = '<p class="empty-state">কোনো লেনদেন নেই</p>';
     return;
   }
-  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>মেম্বার</th><th>ধরন</th><th>পরিমাণ</th></tr></thead><tbody>${rows.map((t) => `<tr><td>${formatDate(t.date)}</td><td>${escapeHtml(t.members?.name || t.member_name || '—')}</td><td><span class="badge ${TYPE_BADGE[t.type] || ''}">${TYPE_LABELS[t.type] || escapeHtml(t.type)}</span></td><td>${formatMoney(t.amount)}</td></tr>`).join('')}</tbody></table>`;
+  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>মেম্বার</th><th>ধরন</th><th>পরিমাণ</th></tr></thead><tbody>${rows.map((t) => `<tr><td>${formatDate(t.transaction_date)}</td><td>${escapeHtml(t.members?.name || t.member_name || '—')}</td><td><span class="badge ${TYPE_BADGE[t.type] || ''}">${TYPE_LABELS[t.type] || escapeHtml(t.type)}</span></td><td>${formatMoney(t.amount)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 function renderMemberBalances(members, balances, targetId) {
@@ -253,14 +253,14 @@ async function loadMembers() {
   balancesCache = calculateBalances(members, transactions);
   target.innerHTML = `<table><thead><tr><th>নাম</th><th>মোবাইল</th><th>ঠিকানা</th><th>স্ট্যাটাস</th><th>ব্যালেন্স</th><th>অ্যাকশন</th></tr></thead><tbody>${members.map((m) => {
     const balance = Number(balancesCache[m.id] || 0);
-    return `<tr><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.phone || '—')}</td><td>${escapeHtml(m.address || '—')}</td><td>${m.active === false ? 'নিষ্ক্রিয়' : 'সক্রিয়'}</td><td class="${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</td><td><button class="btn btn-secondary btn-sm" data-edit-member="${m.id}">এডিট</button> <button class="btn btn-danger btn-sm" data-delete-member="${m.id}">মুছুন</button></td></tr>`;
+    return `<tr><td>${escapeHtml(m.name)}</td><td>${escapeHtml(m.phone || '—')}</td><td>${escapeHtml(m.address || '—')}</td><td>${m.status === 'inactive' ? 'নিষ্ক্রিয়' : 'সক্রিয়'}</td><td class="${balance < 0 ? 'negative' : ''}">${formatMoney(balance)}</td><td><button class="btn btn-secondary btn-sm" data-edit-member="${m.id}">এডিট</button> <button class="btn btn-danger btn-sm" data-delete-member="${m.id}">মুছুন</button></td></tr>`;
   }).join('')}</tbody></table>`;
 }
 
 function memberForm(member = {}) {
   return `<form id="member-form">
     <div class="form-group"><label>নাম *</label><input id="member-name" required value="${escapeHtml(member.name || '')}" /></div>
-    <div class="form-row"><div class="form-group"><label>মোবাইল</label><input id="member-phone" value="${escapeHtml(member.phone || '')}" /></div><div class="form-group"><label>স্ট্যাটাস</label><select id="member-active"><option value="true" ${member.active !== false ? 'selected' : ''}>সক্রিয়</option><option value="false" ${member.active === false ? 'selected' : ''}>নিষ্ক্রিয়</option></select></div></div>
+    <div class="form-row"><div class="form-group"><label>মোবাইল</label><input id="member-phone" value="${escapeHtml(member.phone || '')}" /></div><div class="form-group"><label>স্ট্যাটাস</label><select id="member-status"><option value="active" ${member.status !== 'inactive' ? 'selected' : ''}>সক্রিয়</option><option value="inactive" ${member.status === 'inactive' ? 'selected' : ''}>নিষ্ক্রিয়</option></select></div></div>
     <div class="form-group"><label>ঠিকানা</label><textarea id="member-address">${escapeHtml(member.address || '')}</textarea></div>
     <button class="btn btn-primary btn-block" type="submit">${member.id ? 'আপডেট করুন' : 'যোগ করুন'}</button>
   </form>`;
@@ -270,7 +270,7 @@ function openMemberModal(member = null) {
   openModal(member ? 'মেম্বার সম্পাদনা' : 'নতুন মেম্বার', memberForm(member || {}));
   $('member-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = { name: $('member-name').value.trim(), phone: $('member-phone').value.trim() || null, address: $('member-address').value.trim() || null, active: $('member-active').value === 'true' };
+    const payload = { name: $('member-name').value.trim(), phone: $('member-phone').value.trim() || null, address: $('member-address').value.trim() || null, status: $('member-status').value };
     if (!payload.name) return;
     try {
       const result = member?.id ? await supabase.from('members').update(payload).eq('id', member.id) : await supabase.from('members').insert(payload);
@@ -294,7 +294,7 @@ async function loadTransactions() {
   const rows = await fetchTransactions();
   const target = $('transactions-list');
   if (!rows.length) { target.innerHTML = '<p class="empty-state">কোনো লেনদেন নেই</p>'; return; }
-  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>মেম্বার</th><th>ধরন</th><th>পরিমাণ</th><th>নোট</th><th>অ্যাকশন</th></tr></thead><tbody>${rows.map((t) => `<tr><td>${formatDate(t.date)}</td><td>${escapeHtml(t.members?.name || '—')}</td><td><span class="badge ${TYPE_BADGE[t.type] || ''}">${TYPE_LABELS[t.type] || escapeHtml(t.type)}</span></td><td>${formatMoney(t.amount)}</td><td>${escapeHtml(t.note || '—')}</td><td><button class="btn btn-danger btn-sm" data-delete-transaction="${t.id}">মুছুন</button></td></tr>`).join('')}</tbody></table>`;
+  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>মেম্বার</th><th>ধরন</th><th>পরিমাণ</th><th>নোট</th><th>অ্যাকশন</th></tr></thead><tbody>${rows.map((t) => `<tr><td>${formatDate(t.transaction_date)}</td><td>${escapeHtml(t.members?.name || '—')}</td><td><span class="badge ${TYPE_BADGE[t.type] || ''}">${TYPE_LABELS[t.type] || escapeHtml(t.type)}</span></td><td>${formatMoney(t.amount)}</td><td>${escapeHtml(t.note || '—')}</td><td><button class="btn btn-danger btn-sm" data-delete-transaction="${t.id}">মুছুন</button></td></tr>`).join('')}</tbody></table>`;
 }
 
 function transactionForm() {
@@ -313,7 +313,7 @@ async function openTransactionModal() {
   openModal('নতুন লেনদেন', transactionForm());
   $('transaction-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = { member_id: $('transaction-member').value, type: $('transaction-type').value, amount: Number($('transaction-amount').value), date: $('transaction-date').value, note: $('transaction-note').value.trim() || null };
+    const payload = { member_id: $('transaction-member').value, type: $('transaction-type').value, amount: Number($('transaction-amount').value), transaction_date: $('transaction-date').value, note: $('transaction-note').value.trim() || null };
     try {
       const { error } = await supabase.from('transactions').insert(payload);
       if (error) throw error;
@@ -333,7 +333,7 @@ async function loadExpenses() {
   const rows = await fetchExpenses();
   const target = $('expenses-list');
   if (!rows.length) { target.innerHTML = '<p class="empty-state">কোনো খরচ নেই</p>'; return; }
-  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>খাত</th><th>পরিমাণ</th><th>নোট</th><th>অ্যাকশন</th></tr></thead><tbody>${rows.map((e) => `<tr><td>${formatDate(e.date)}</td><td>${escapeHtml(e.title || e.category || '—')}</td><td>${formatMoney(e.amount)}</td><td>${escapeHtml(e.note || '—')}</td><td><button class="btn btn-danger btn-sm" data-delete-expense="${e.id}">মুছুন</button></td></tr>`).join('')}</tbody></table>`;
+  target.innerHTML = `<table><thead><tr><th>তারিখ</th><th>খাত</th><th>পরিমাণ</th><th>নোট</th><th>অ্যাকশন</th></tr></thead><tbody>${rows.map((e) => `<tr><td>${formatDate(e.expense_date)}</td><td>${escapeHtml(e.title || e.category || '—')}</td><td>${formatMoney(e.amount)}</td><td>${escapeHtml(e.note || '—')}</td><td><button class="btn btn-danger btn-sm" data-delete-expense="${e.id}">মুছুন</button></td></tr>`).join('')}</tbody></table>`;
 }
 
 function expenseForm() {
@@ -344,7 +344,7 @@ function openExpenseModal() {
   openModal('নতুন খরচ', expenseForm());
   $('expense-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const payload = { title: $('expense-title').value.trim(), amount: Number($('expense-amount').value), date: $('expense-date').value, note: $('expense-note').value.trim() || null };
+    const payload = { title: $('expense-title').value.trim(), amount: Number($('expense-amount').value), expense_date: $('expense-date').value, note: $('expense-note').value.trim() || null };
     try { const { error } = await supabase.from('expenses').insert(payload); if (error) throw error; closeModal(); showToast('খরচ সংরক্ষণ হয়েছে'); await loadExpenses(); }
     catch (error) { showToast(friendlyError(error)); }
   });
@@ -367,8 +367,8 @@ async function loadMonthly() {
   endDate.setMonth(endDate.getMonth() + 1);
   const end = endDate.toISOString().slice(0, 10);
   const [{ data: transactions, error: txError }, { data: expenses, error: exError }, members] = await Promise.all([
-    supabase.from('transactions').select('*, members(name)').gte('date', start).lt('date', end),
-    supabase.from('expenses').select('*').gte('date', start).lt('date', end),
+    supabase.from('transactions').select('*, members(name)').gte('transaction_date', start).lt('transaction_date', end),
+    supabase.from('expenses').select('*').gte('expense_date', start).lt('expense_date', end),
     fetchMembers()
   ]);
   if (txError) throw txError;
