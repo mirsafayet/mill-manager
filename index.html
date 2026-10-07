@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="description" content="মিল ম্যানেজার - রাইস মিল ও মেম্বার হিসাব ব্যবস্থাপনা" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>মিল ম্যানেজার</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="screen">
+    <div class="login-card">
+      <div class="login-logo">🌾</div>
+      <h1>মিল ম্যানেজার</h1>
+      <p class="login-sub">রাইস মিল ও মেম্বার হিসাব</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">ইমেইল</label>
+          <input type="email" id="login-email" placeholder="admin@example.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label for="login-password">পাসওয়ার্ড</label>
+          <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">লগইন</button>
+        <p id="login-error" class="error-msg hidden"></p>
+      </form>
+      <p class="setup-hint">প্রথমবার? Supabase-এ অ্যাডমিন ইউজার তৈরি করুন</p>
+    </div>
+  </div>
+
+  <!-- App Screen -->
+  <div id="app-screen" class="screen hidden">
+    <!-- Top Nav -->
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" aria-label="মেনু">☰</button>
+      <h1 class="topbar-title" id="page-title">ড্যাশবোর্ড</h1>
+      <button class="logout-btn" id="logout-btn" title="লগআউট">🚪</button>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">🌾</span>
+        <span>মিল ম্যানেজার</span>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-page="dashboard">📊 ড্যাশবোর্ড</button>
+        <button class="nav-item" data-page="members">👥 মেম্বার</button>
+        <button class="nav-item" data-page="transactions">💰 লেনদেন</button>
+        <button class="nav-item" data-page="expenses">🧾 খরচ</button>
+        <button class="nav-item" data-page="monthly">📅 মাসিক হিসাব</button>
+        <button class="nav-item" data-page="reports">📈 রিপোর্ট</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="nav-item" id="sidebar-logout">লগআউট</button>
+      </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <!-- Dashboard -->
+      <section id="page-dashboard" class="page">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <span class="stat-label">মোট মেম্বার</span>
+              <span class="stat-value" id="stat-members">0</span>
+  
+...
